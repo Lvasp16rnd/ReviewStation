@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 // Importa o ViewModel
 import 'action_button_view_model.dart'; 
-// 🚨 IMPORTS DO DESIGN SYSTEM CORRIGIDOS
+// IMPORTS DO DESIGN SYSTEM CORRIGIDOS
 import 'package:reviewstation_app/resources/shared/styles/colors.dart';
 import 'package:reviewstation_app/resources/shared/styles/typography.dart';
 
@@ -37,7 +37,7 @@ class ActionButton extends StatelessWidget {
         }
     }
 
-    // 💡 Helper para definir a cor base do botão
+    // Helper para definir a cor base do botão
     Color _getButtonColor(ActionButtonStyle style) {
         switch (style) {
             case ActionButtonStyle.primary:

@@ -25,7 +25,7 @@ class BadgeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 💡 Usa o onPressed injetado, removendo a lógica de navegação acoplada
+    // Usa o onPressed injetado, removendo a lógica de navegação acoplada
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -45,7 +45,7 @@ class BadgeButton extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                // 🎨 Usa a cor de erro/destaque do Design System
+                // Usa a cor de erro/destaque do Design System
                 color: AppColors.error, 
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.surface, width: 1.5), // Borda branca para destaque
@@ -55,7 +55,7 @@ class BadgeButton extends StatelessWidget {
                 // Limita a exibição se o número for muito grande
                 notificationCount > 99 ? '99+' : '$notificationCount', 
                 style: const TextStyle(
-                    // 🎨 Usa cores do Design System
+                    // Usa cores do Design System
                     color: AppColors.surface, 
                     fontSize: 10,
                     fontWeight: FontWeight.bold,

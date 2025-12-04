@@ -14,11 +14,14 @@ class ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usar ?. para checar se 'author' é nulo antes de acessar 'fullName'
-    final authorName = review.author?.fullName ?? 'Usuário Desconhecido';
+    // Usa review.userName (o campo plano)
+    final authorName = review.userName ?? 'Usuário Desconhecido';
     
     // Garantir que 'createdAt' não é nulo antes de formatar
-    final formattedDate = '${review.createdAt.day}/${review.createdAt.month}/${review.createdAt.year}';
+    // Como 'createdAt' é required no modelo, usamos o operador ! para formatar a data
+    final formattedDate = review.createdAt != null 
+        ? '${review.createdAt!.day}/${review.createdAt!.month}/${review.createdAt!.year}'
+        : 'Data Desconhecida'; 
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -31,7 +34,7 @@ class ReviewTile extends StatelessWidget {
             children: [
               // Nome do Autor
               Text(
-                authorName,
+                authorName, // ✅ Usa o nome real do usuário
                 style: AppTypography.title.copyWith(fontSize: 16),
               ),
               // Data
@@ -48,11 +51,10 @@ class ReviewTile extends StatelessWidget {
             children: [
               Icon(
                 Icons.star,
-                color: AppColors.secondary, // Cor de destaque para a nota
+                color: AppColors.secondary,
                 size: 18,
               ),
               const SizedBox(width: 4),
-              // Rating é um double, formatamos
               Text(
                 review.rating.toStringAsFixed(1),
                 style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.bold),
@@ -62,7 +64,6 @@ class ReviewTile extends StatelessWidget {
           const SizedBox(height: 8),
 
           // 3. Conteúdo do Texto
-          // ✅ Correção de Segurança (Removendo o ! e usando ?? para evitar crash se textContent for null)
           Text(
             review.textContent ?? 'O autor não forneceu um comentário escrito.',
             style: AppTypography.bodyText,
