@@ -14,8 +14,10 @@ class ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Formata a data e o nome do autor (que está no modelo aninhado)
+    // Usar ?. para checar se 'author' é nulo antes de acessar 'fullName'
     final authorName = review.author?.fullName ?? 'Usuário Desconhecido';
+    
+    // Garantir que 'createdAt' não é nulo antes de formatar
     final formattedDate = '${review.createdAt.day}/${review.createdAt.month}/${review.createdAt.year}';
 
     return Padding(
@@ -50,6 +52,7 @@ class ReviewTile extends StatelessWidget {
                 size: 18,
               ),
               const SizedBox(width: 4),
+              // Rating é um double, formatamos
               Text(
                 review.rating.toStringAsFixed(1),
                 style: AppTypography.bodyText.copyWith(fontWeight: FontWeight.bold),
@@ -59,12 +62,12 @@ class ReviewTile extends StatelessWidget {
           const SizedBox(height: 8),
 
           // 3. Conteúdo do Texto
-          if (review.textContent != null && review.textContent!.isNotEmpty)
-            Text(
-              review.textContent!,
-              style: AppTypography.bodyText,
-              textAlign: TextAlign.justify,
-            ),
+          // ✅ Correção de Segurança (Removendo o ! e usando ?? para evitar crash se textContent for null)
+          Text(
+            review.textContent ?? 'O autor não forneceu um comentário escrito.',
+            style: AppTypography.bodyText,
+            textAlign: TextAlign.justify,
+          ),
 
           // 4. Separador
           const Divider(height: 24, thickness: 1),

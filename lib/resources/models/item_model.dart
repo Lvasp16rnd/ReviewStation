@@ -1,21 +1,22 @@
 // item_model.dart
 import 'review_model.dart'; 
-// ...
+import 'dart:convert';
+import 'dart:core'; // Importado implicitamente, mas para clareza
+
 class ItemModel {
-  // --- Campos Principais do Item ---
+  // ... Campos Principais
   final String id;
   final String title;
   final String description;
-  final String type; // Ex: 'Movie', 'Book', 'Game'
+  final String type; 
   final DateTime releaseDate;
+  final String? posterUrl;
 
-  // --- Campos de Agregação da Review ---
-  final double averageRating; // A média calculada pela API
-  final int totalReviews;     // O número total de reviews
+  // ... Campos de Agregação
+  final double averageRating; 
+  final int totalReviews;     
 
   // --- Relacionamento (Reviews) ---
-  // A API pode retornar uma lista de Reviews recentes junto com o Item.
-  // Usamos a lista de ReviewModel aqui.
   final List<ReviewModel> recentReviews; 
 
   ItemModel({
@@ -27,32 +28,40 @@ class ItemModel {
     required this.averageRating,
     required this.totalReviews,
     required this.recentReviews,
+    this.posterUrl,
   });
 
-  // Método de Fábrica para construir o modelo a partir do JSON da API
   factory ItemModel.fromJson(Map<String, dynamic> json) {
-    // Tratamento da lista de reviews: garante que ela seja populada corretamente
-    // Se 'recentReviews' não vier, usa uma lista vazia.
-    final List<dynamic>? reviewsJson = json['recentReviews'];
+    
+    final descriptionValue = (json['description'] as String?) ?? '';
+    
+    final rawYear = json['releaseYear'] as int?; 
+    final DateTime releaseDateValue = rawYear != null
+        ? DateTime.utc(rawYear) // Agora sabemos que é um int não-nulo
+        : DateTime(1900); 
+
+    // 🔑 CORREÇÃO CRÍTICA: Lendo a chave 'reviews' do JSON da API
+    final List<dynamic>? reviewsJson = json['reviews']; // <<-- A CHAVE CORRETA
+
     final List<ReviewModel> reviews = reviewsJson != null
-        ? reviewsJson.map((r) => ReviewModel.fromJson(r)).toList()
+        ? reviewsJson.map((r) {
+            final reviewMap = Map<String, dynamic>.from(r as Map);
+            reviewMap['itemId'] = json['id']; // Injeta o ID do Item
+            
+            return ReviewModel.fromJson(reviewMap);
+        }).toList()
         : [];
         
-    // A API Node.js/Prisma geralmente retorna IDs como Strings.
     return ItemModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
-      type: json['type'] as String,
-      
-      // Converte a string de data (ISO 8601) para objeto DateTime
-      releaseDate: DateTime.parse(json['releaseDate'] as String), 
-      
-      // A média pode vir como int, double ou string; garante que seja double
-      averageRating: (json['averageRating'] as num).toDouble(),
-      totalReviews: json['totalReviews'] as int,
-      recentReviews: reviews,
+        id: json['id'] as String,
+        title: json['title'] as String,
+        posterUrl: json['posterUrl'] as String?,
+        description: descriptionValue, 
+        type: json['type'] as String,
+        releaseDate: releaseDateValue, 
+        averageRating: (json['averageRating'] as num? ?? 0.0).toDouble(), 
+        totalReviews: (json['totalReviews'] as int? ?? 0),
+        recentReviews: reviews,
     );
   }
 }
-

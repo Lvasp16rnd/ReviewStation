@@ -1,7 +1,3 @@
-// Camada responsável por buscar e formatar os dados do catálogo
-// da API (ex: GET /item e GET /item/:id), incluindo o cálculo 
-// das médias de rating.
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -21,12 +17,11 @@ class ItemService {
   static const String _endpoint = '/item'; 
 
   // -------------------------------------------------------------------
-  // 1. Listar Catálogo (GET /item)
+  // 1. Listar Catálogo (GET /item) - AGORA COM DIAGNÓSTICO
   // -------------------------------------------------------------------
 
   Future<List<ItemModel>> fetchItemList({String? type, int? year}) async {
     
-    // Constrói os Query Parameters (ex: ?type=MOVIE)
     final Map<String, dynamic> queryParams = {};
     if (type != null) {
       queryParams['type'] = type;
@@ -35,28 +30,39 @@ class ItemService {
       queryParams['releaseYear'] = year;
     }
 
-    // Nota: A rota GET /item não é protegida por JWT em sua API atual.
-    final http.Response response = await _apiClient.get(_endpoint, queryParams: queryParams);
+    try {
+      final http.Response response = await _apiClient.get(_endpoint, queryParams: queryParams);
 
-    if (response.statusCode == 200) {
-      // Converte a string JSON para uma lista dinâmica
-      final List<dynamic> jsonList = jsonDecode(response.body); 
-      
-      // Mapeia a lista de JSONs para uma lista de ItemModel
-      return jsonList.map((json) => ItemModel.fromJson(json)).toList();
-    } else {
-      throw Exception('Falha ao carregar a lista de itens. Código: ${response.statusCode}');
+      // 🚨 DIAGNÓSTICO 1: Loga o status e o corpo recebido
+      print('--- Diagnóstico GET /item ---');
+      print('Status Code: ${response.statusCode}');
+      print('Response Body Preview: ${response.body.substring(0, 50)}...');
+      print('-----------------------------');
+
+      if (response.statusCode == 200) {
+        // Tenta decodificar a lista
+        final List<dynamic> jsonList = jsonDecode(response.body); 
+        
+        // Mapeia a lista de JSONs para uma lista de ItemModel
+        return jsonList.map((json) => ItemModel.fromJson(json)).toList();
+      } else {
+        // Lança exceção para qualquer status que não seja 200
+        throw Exception('Falha ao buscar itens. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      // 🚨 DIAGNÓSTICO 2: Captura erros de parsing JSON ou de rede
+      print('Erro de execução em fetchItemList: $e');
+      throw Exception('Não foi possível processar a lista de itens. Detalhes: ${e.toString()}');
     }
   }
 
   // -------------------------------------------------------------------
-  // 2. Detalhes do Item (GET /item/:id)
+  // 2. Detalhes do Item (GET /item/:id) - Mantido
   // -------------------------------------------------------------------
 
   Future<ItemModel> fetchItemDetails(String itemId) async {
     final String endpoint = '$_endpoint/$itemId';
 
-    // Nota: A rota GET /item/:id também não é protegida.
     final http.Response response = await _apiClient.get(endpoint, requiresAuth: false);
 
     if (response.statusCode == 200) {
@@ -69,7 +75,7 @@ class ItemService {
       throw Exception('Falha ao carregar detalhes do item. Código: ${response.statusCode}');
     }
   }
-
+}
   // -------------------------------------------------------------------
   // 3. (Implementar***) Gerenciamento de Item - Exige JWT
   // -------------------------------------------------------------------
@@ -80,4 +86,3 @@ class ItemService {
   //   // Simulação de chamada: await _apiClient.put(endpoint, body: data, token: token);
   //   // ...
   // }
-}
