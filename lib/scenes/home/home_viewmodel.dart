@@ -50,9 +50,9 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
   
-  // -------------------------------------------------------------------
+  
   // Lógica de Navegação (Intenções)
-  // -------------------------------------------------------------------
+  
   
   // Chamado quando o usuário clica em um item.
   void itemTapped(String itemId) {

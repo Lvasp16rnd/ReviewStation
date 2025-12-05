@@ -16,9 +16,9 @@ class ItemService {
   // Endpoint base
   static const String _endpoint = '/item'; 
 
-  // -------------------------------------------------------------------
+   
   // 1. Listar Catálogo (GET /item) - AGORA COM DIAGNÓSTICO
-  // -------------------------------------------------------------------
+   
 
   Future<List<ItemModel>> fetchItemList({String? type, int? year}) async {
     
@@ -56,9 +56,9 @@ class ItemService {
     }
   }
 
-  // -------------------------------------------------------------------
+   
   // 2. Detalhes do Item (GET /item/:id) - Mantido
-  // -------------------------------------------------------------------
+   
 
   Future<ItemModel> fetchItemDetails(String itemId) async {
     final String endpoint = '$_endpoint/$itemId';
@@ -76,9 +76,9 @@ class ItemService {
     }
   }
 }
-  // -------------------------------------------------------------------
+   
   // 3. (Implementar***) Gerenciamento de Item - Exige JWT
-  // -------------------------------------------------------------------
+   
 
   // Future<void> updateItem(String itemId, Map<String, dynamic> data, String token) async {
   //   // Este método exigiria que o ApiClient fosse capaz de adicionar o Header JWT!

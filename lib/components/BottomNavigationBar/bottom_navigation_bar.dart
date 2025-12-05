@@ -22,7 +22,7 @@ class CustomBottomNavigationBar extends StatefulWidget {
 
 class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
 
-  // 💡 Helper para definir a cor base do estilo
+  // Helper para definir a cor base do estilo
   Color _getStyleColor(ActionBottomNavigationBarStyle style) {
     switch (style) {
       case ActionBottomNavigationBarStyle.primary:
@@ -43,7 +43,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      // 🎨 Cor de fundo: Superfície branca/clara do Design System
+      // Cor de fundo: Superfície branca/clara do Design System
       color: AppColors.surface, 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -54,7 +54,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
           return GestureDetector(
             onTap: () {
               setState(() {
-                // 💡 Lógica interna do mini-MVVM para atualização de estado
+                // Lógica interna do mini-MVVM para atualização de estado
                 widget.viewModel.selectedIndex = index;
                 widget.viewModel.onItemSelected(index);
               });
@@ -62,14 +62,14 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🎨 Ícone
+                // Ícone
                 Icon(
                   item.icon,
                   color: isSelected ? selectedColor : unselectedColor,
                   size: _getIconSize(widget.viewModel.size), // Usa a lógica de tamanho
                 ),
                 const SizedBox(height: 4),
-                // 🎨 Texto
+                // Texto
                 Text(
                   item.label,
                   style: AppTypography.caption.copyWith( // Usa um estilo base do Design System

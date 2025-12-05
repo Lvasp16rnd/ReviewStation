@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Importa Components e Design System
 import 'package:reviewstation_app/components/review_title.dart';
 import '../../../resources/shared/styles/typography.dart';
 import '../../../resources/shared/styles/colors.dart';
@@ -12,24 +11,26 @@ class ItemDetailsView extends StatelessWidget {
 
   const ItemDetailsView({super.key, required this.viewModel});
 
+  // Helper para o caminho da imagem
+  String _getAssetPath(String fileName) {
+    return 'assets/images/$fileName';
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: viewModel,
       child: Scaffold(
         appBar: AppBar(
-          title: Consumer<ItemDetailsViewModel>(
-            builder: (context, vm, child) => Text(vm.item?.title ?? 'Detalhes do Item'),
-          ),
+          // Título simplificado na AppBar já que temos o título grande no corpo
+          title: const Text('Detalhes'), 
         ),
         
-        // FloatingActionButton
         floatingActionButton: Consumer<ItemDetailsViewModel>(
           builder: (context, vm, child) {
             if (vm.isLoading || vm.errorMessage != null || vm.item == null) {
               return const SizedBox.shrink();
             }
-            // 🚨 Este botão chama a navegação para o formulário de review
             return FloatingActionButton.extended(
               onPressed: vm.fabTapped,
               icon: const Icon(Icons.rate_review),
@@ -41,8 +42,6 @@ class ItemDetailsView extends StatelessWidget {
 
         body: Consumer<ItemDetailsViewModel>(
           builder: (context, vm, child) {
-            
-            // Estado de Carregamento/Erro
             if (vm.isLoading) {
               return const Center(child: CircularProgressIndicator());
             }
@@ -51,47 +50,120 @@ class ItemDetailsView extends StatelessWidget {
             }
 
             final item = vm.item;
-            final reviews = item?.recentReviews ?? []; // Pega a lista de reviews
+            final reviews = item?.recentReviews ?? [];
+            final hasPoster = item?.posterUrl != null && item!.posterUrl!.isNotEmpty;
 
             if (item != null) {
               return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- Informações Principais do Item ---
-                    Text(item.title, style: AppTypography.headline1),
-                    const SizedBox(height: 8),
-                    Text('Tipo: ${item.type} | Lançamento: ${item.releaseDate.year}', style: AppTypography.bodyText),
-                    const SizedBox(height: 16),
                     
-                    // Nota Média
-                    Text(
-                      'Avaliação Média: ${item.averageRating.toStringAsFixed(1)} (${item.totalReviews})', 
-                      style: AppTypography.title.copyWith(color: AppColors.primary)
-                    ),
-                    const SizedBox(height: 24),
-                    Text(item.description, style: AppTypography.bodyText),
-                    const SizedBox(height: 40),
+                    // 1. CABEÇALHO (Título + Info à Esquerda | Poster à Direita)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Lado Esquerdo: Textos (Expanded para ocupar o espaço restante)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.title, 
+                                style: AppTypography.headline1.copyWith(fontSize: 22), // Ajuste de tamanho se necessário
+                              ),
+                              const SizedBox(height: 8),
+                              
+                              Text(
+                                '${item.type} (${item.releaseDate.year})', 
+                                style: AppTypography.bodyText.copyWith(color: AppColors.textLight)
+                              ),
+                              const SizedBox(height: 12),
+                              
+                              // Rating
+                              Row(
+                                children: [
+                                  const Icon(Icons.star, color: AppColors.secondary, size: 20),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    item.averageRating.toStringAsFixed(1), 
+                                    style: AppTypography.title.copyWith(color: AppColors.secondary, fontSize: 18)
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '(${item.totalReviews} reviews)', 
+                                    style: AppTypography.caption
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        const SizedBox(width: 16), // Espaço entre texto e imagem
 
-                    // --- Seção de Reviews ---
-                    Text(
-                      'Últimas Avaliações', 
-                      style: AppTypography.title
+                        // Lado Direito: Poster (Se existir)
+                        if (hasPoster)
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                )
+                              ]
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                _getAssetPath(item.posterUrl!),
+                                width: 100, // Largura fixa para o poster na tela de detalhes
+                                height: 150, // Altura fixa
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => const SizedBox(width: 100, height: 150),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
+
+                    const SizedBox(height: 24),
+                    const Divider(),
                     const SizedBox(height: 16),
 
-                    // 💡 NOVO: Lista de Reviews usando ListView.builder aninhado
+                    // 2. DESCRIÇÃO
+                    Text('Sinopse', style: AppTypography.title),
+                    const SizedBox(height: 8),
+                    Text(
+                      item.description, 
+                      style: AppTypography.bodyText,
+                      textAlign: TextAlign.justify,
+                    ),
+                    const SizedBox(height: 32),
+
+                    // 3. REVIEWS
+                    Text('Avaliações', style: AppTypography.title),
+                    const SizedBox(height: 16),
+
                     if (reviews.isEmpty)
-                      Text('Nenhuma avaliação encontrada.', style: AppTypography.caption.copyWith(color: AppColors.textLight))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                            'Seja o primeiro a avaliar!', 
+                            style: AppTypography.bodyText.copyWith(color: AppColors.textLight)
+                          )
+                        ),
+                      )
                     else
                       ListView.builder(
-                        // Crucial para aninhar ListView dentro de SingleChildScrollView
                         physics: const NeverScrollableScrollPhysics(),
                         shrinkWrap: true, 
                         itemCount: reviews.length,
                         itemBuilder: (context, index) {
-                          // Usa o componente ReviewTile criado
                           return ReviewTile(review: reviews[index]); 
                         },
                       ),

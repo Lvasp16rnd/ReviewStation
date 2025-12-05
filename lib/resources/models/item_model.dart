@@ -40,13 +40,14 @@ class ItemModel {
         ? DateTime.utc(rawYear) // Agora sabemos que é um int não-nulo
         : DateTime(1900); 
 
-    // 🔑 CORREÇÃO CRÍTICA: Lendo a chave 'reviews' do JSON da API
+    // Lendo a chave 'reviews' do JSON da API
     final List<dynamic>? reviewsJson = json['reviews']; // <<-- A CHAVE CORRETA
 
     final List<ReviewModel> reviews = reviewsJson != null
         ? reviewsJson.map((r) {
             final reviewMap = Map<String, dynamic>.from(r as Map);
-            reviewMap['itemId'] = json['id']; // Injeta o ID do Item
+            // Injeta o itemId no JSON da review
+            reviewMap['itemId'] = json['id']; 
             
             return ReviewModel.fromJson(reviewMap);
         }).toList()
